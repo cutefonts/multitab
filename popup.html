@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi Tab Search</title>
+    <link rel="stylesheet" href="popup.css">
+    <style>
+        body {
+            width: 500px;
+            min-height: 600px;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Multi Tab Search Extension</h2>
+        </div>
+
+        <div class="main-content">
+            <label for="search-queries" class="label">
+                Type (or paste) the words in the area below, one per line:
+            </label>
+            <textarea 
+                id="search-queries" 
+                placeholder="Enter your search queries here, one per line..."
+                rows="8"
+            ></textarea>
+
+            <div class="filters-section">
+                <h3>Website Filters</h3>
+                <div class="filters-grid">
+                    <div class="filter-column">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-youtube" data-site="youtube.com">
+                            Remove YouTube
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-soundcloud" data-site="soundcloud.com">
+                            Remove SoundCloud
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-residentadvisor" data-site="residentadvisor.net">
+                            Remove Resident Advisor
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-facebook" data-site="facebook.com">
+                            Remove Facebook
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-discogs" data-site="discogs.com">
+                            Remove Discogs
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-junodownload" data-site="junodownload.com">
+                            Remove JunoDownload
+                        </label>
+                    </div>
+                    <div class="filter-column">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-itunes" data-site="apple.com">
+                            Remove iTunes
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-beatport" data-site="beatport.com">
+                            Remove Beatport
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-trackitdown" data-site="trackitdown.net">
+                            Remove Trackitdown
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-djdownload" data-site="djdownload.com">
+                            Remove DjDownload
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-mixcloud" data-site="mixcloud.com">
+                            Remove MixCloud
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remove-traxsource" data-site="traxsource.com">
+                            Remove Traxsource
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="extra-params">
+                <label for="extra-parameters" class="label">Extra parameters:</label>
+                <input 
+                    type="text" 
+                    id="extra-parameters" 
+                    placeholder="-website1 -website2 some search term..."
+                >
+            </div>
+
+            <div class="options-section">
+                <div class="options-grid">
+                    <div class="options-column">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="select-all">
+                            Select all / none
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="clear-words" checked>
+                            Clear words after Search / Open
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="add-https" checked>
+                            Add https:// before URLs
+                        </label>
+                    </div>
+                    <div class="options-column">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="surround-quotes">
+                            Surround by "quotes"
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="trim-lines" checked>
+                            Trim each line
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-engine-section">
+                <label for="search-engine" class="label">Search engine:</label>
+                <select id="search-engine">
+                    <option value="google">Google</option>
+                    <option value="bing">Bing</option>
+                    <option value="duckduckgo">DuckDuckGo</option>
+                    <option value="yahoo">Yahoo</option>
+                </select>
+            </div>
+
+            <div class="buttons-section">
+                <button id="search-btn" class="btn btn-primary">Search</button>
+                <button id="open-urls-btn" class="btn btn-secondary">Open URLs *</button>
+                <button id="reset-btn" class="btn btn-reset">Reset settings</button>
+            </div>
+
+            <div class="note">
+                <small>* Opens only fully qualified urls (ex.: https://www.google.com)</small>
+            </div>
+
+            <div class="status" id="status"></div>
+            <div class="progress-container" id="progress-container" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text" id="progress-text">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load scripts in correct order -->
+    <script src="popup.js"></script>
+</body>
+</html>
