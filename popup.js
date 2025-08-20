@@ -164,11 +164,6 @@ class MultiTabSearch {
         if (document.getElementById('clear-words').checked) {
             setTimeout(() => {
                 document.getElementById('search-queries').value = '';
-                this.setButtonsEnabled(true);
-            }, 1000);
-        } else {
-            setTimeout(() => {
-                this.setButtonsEnabled(true);
             }, 1000);
         }
     }
@@ -397,4 +392,4 @@ class MultiTabSearch {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new MultiTabSearch();
-}); 
+});
