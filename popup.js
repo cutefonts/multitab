@@ -152,14 +152,24 @@ class MultiTabSearch {
             return;
         }
 
+        // Disable buttons during processing
+        this.setButtonsEnabled(false);
+
         const searchEngine = document.getElementById('search-engine').value;
         const searchResults = this.processQueries(queries, searchEngine);
         
+        this.showStatus(`Processing ${searchResults.length} search queries...`, 'info');
         this.openTabs(searchResults);
-        this.showStatus(`Opening ${searchResults.length} search tabs...`, 'success');
         
         if (document.getElementById('clear-words').checked) {
-            document.getElementById('search-queries').value = '';
+            setTimeout(() => {
+                document.getElementById('search-queries').value = '';
+                this.setButtonsEnabled(true);
+            }, 1000);
+        } else {
+            setTimeout(() => {
+                this.setButtonsEnabled(true);
+            }, 1000);
         }
     }
 
@@ -170,12 +180,28 @@ class MultiTabSearch {
             return;
         }
 
+        // Disable buttons during processing
+        this.setButtonsEnabled(false);
+
+        this.showStatus(`Processing ${urls.length} URLs...`, 'info');
         this.openTabs(urls);
-        this.showStatus(`Opening ${urls.length} URL tabs...`, 'success');
         
         if (document.getElementById('clear-words').checked) {
-            document.getElementById('search-queries').value = '';
+            setTimeout(() => {
+                document.getElementById('search-queries').value = '';
+                this.setButtonsEnabled(true);
+            }, 1000);
+        } else {
+            setTimeout(() => {
+                this.setButtonsEnabled(true);
+            }, 1000);
         }
+    }
+
+    setButtonsEnabled(enabled) {
+        document.getElementById('search-btn').disabled = !enabled;
+        document.getElementById('open-urls-btn').disabled = !enabled;
+        document.getElementById('reset-btn').disabled = !enabled;
     }
 
     getSearchQueries() {
@@ -236,27 +262,97 @@ class MultiTabSearch {
         const baseUrl = searchUrls[searchEngine] || searchUrls['google'];
         const extraParams = document.getElementById('extra-parameters').value.trim();
         
+        // Get active filters
+        const filters = this.getActiveFilters();
+        
         return queries.map(query => {
             let searchQuery = query;
+            
+            // Add filters to search query
+            if (filters.length > 0) {
+                searchQuery += ' ' + filters.join(' ');
+            }
+            
             if (extraParams) {
                 searchQuery += ' ' + extraParams;
             }
+            
             return baseUrl + encodeURIComponent(searchQuery);
         });
     }
 
+    getActiveFilters() {
+        const filters = [];
+        const filterMappings = {
+            'remove-youtube': '-site:youtube.com',
+            'remove-soundcloud': '-site:soundcloud.com',
+            'remove-itunes': '-site:apple.com',
+            'remove-beatport': '-site:beatport.com',
+            'remove-facebook': '-site:facebook.com',
+            'remove-discogs': '-site:discogs.com',
+            'remove-mixcloud': '-site:mixcloud.com',
+            'remove-traxsource': '-site:traxsource.com',
+            'remove-residentadvisor': '-site:residentadvisor.net',
+            'remove-trackitdown': '-site:trackitdown.net',
+            'remove-djdownload': '-site:djdownload.com',
+            'remove-junodownload': '-site:junodownload.com'
+        };
+
+        Object.keys(filterMappings).forEach(filterId => {
+            if (document.getElementById(filterId).checked) {
+                filters.push(filterMappings[filterId]);
+            }
+        });
+
+        return filters;
+    }
+
     openTabs(urls) {
-        if (urls.length > 100) {
+        if (urls.length > 50) {
             if (!confirm(`You're about to open ${urls.length} tabs. This might slow down your browser. Continue?`)) {
                 return;
             }
         }
 
-        urls.forEach((url, index) => {
+        this.showProgress(true);
+        this.openTabsSequentially(urls, 0);
+    }
+
+    openTabsSequentially(urls, index) {
+        if (index >= urls.length) {
+            this.showProgress(false);
+            this.showStatus(`Successfully opened ${urls.length} tabs!`, 'success');
+            return;
+        }
+
+        // Update progress
+        const progress = Math.round((index / urls.length) * 100);
+        this.updateProgress(progress, `Opening tab ${index + 1} of ${urls.length}`);
+
+        // Open the current tab
+        chrome.tabs.create({ url: urls[index] }, () => {
+            // Continue with next tab after a short delay
             setTimeout(() => {
-                chrome.tabs.create({ url: url });
-            }, index * 100); // 100ms delay between tabs
+                this.openTabsSequentially(urls, index + 1);
+            }, 50); // Reduced delay for faster processing
         });
+    }
+
+    showProgress(show) {
+        const progressContainer = document.getElementById('progress-container');
+        progressContainer.style.display = show ? 'block' : 'none';
+        
+        if (!show) {
+            this.updateProgress(0, '');
+        }
+    }
+
+    updateProgress(percentage, text) {
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        
+        progressFill.style.width = percentage + '%';
+        progressText.textContent = text || `${percentage}%`;
     }
 
     resetSettings() {
@@ -271,10 +367,13 @@ class MultiTabSearch {
         const status = document.getElementById('status');
         status.textContent = message;
         status.className = `status ${type}`;
+        status.style.display = 'block';
         
-        setTimeout(() => {
-            status.style.display = 'none';
-        }, 5000);
+        if (type !== 'info') {
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
     }
 
     updateUI() {
