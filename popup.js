@@ -308,8 +308,9 @@ class MultiTabSearch {
     }
 
     openTabs(urls) {
-        if (urls.length > 50) {
+        if (urls.length > 100) {
             if (!confirm(`You're about to open ${urls.length} tabs. This might slow down your browser. Continue?`)) {
+                this.setButtonsEnabled(true);
                 return;
             }
         }
@@ -322,6 +323,7 @@ class MultiTabSearch {
         if (index >= urls.length) {
             this.showProgress(false);
             this.showStatus(`Successfully opened ${urls.length} tabs!`, 'success');
+            this.setButtonsEnabled(true);
             return;
         }
 
@@ -330,11 +332,21 @@ class MultiTabSearch {
         this.updateProgress(progress, `Opening tab ${index + 1} of ${urls.length}`);
 
         // Open the current tab
-        chrome.tabs.create({ url: urls[index] }, () => {
-            // Continue with next tab after a short delay
-            setTimeout(() => {
+        chrome.tabs.create({ 
+            url: urls[index],
+            active: false // Don't make each new tab active
+        }, (tab) => {
+            // Check if tab was created successfully
+            if (chrome.runtime.lastError) {
+                console.error('Error creating tab:', chrome.runtime.lastError);
+                // Continue with next tab even if this one failed
+                setTimeout(() => {
+                    this.openTabsSequentially(urls, index + 1);
+                }, 100);
+            } else {
+                // Continue with next tab immediately after successful creation
                 this.openTabsSequentially(urls, index + 1);
-            }, 50); // Reduced delay for faster processing
+            }
         });
     }
 
